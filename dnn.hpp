@@ -33,7 +33,7 @@ VTYPE transfer(VTYPE i) {
 }
 
 void compare(VTYPE* neuron1, VTYPE* neuron2, int size) {
-  bool error = true;
+  bool error = false;
   for(int i = 0; i < size; ++i) {
       VTYPE diff = neuron1[i] - neuron2[i];
       if(diff>0.001f || diff <-0.001f) {

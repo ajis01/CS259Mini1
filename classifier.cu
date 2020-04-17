@@ -22,7 +22,7 @@ using namespace std;
   #define Ti 16
 #endif
 #define  threadsPerBlock  256
-#define  blocksPerGrid    Ni * Nn / threadsPerBlock
+#define  blocksPerGrid    (Ni + threadsPerBlock - 1) / threadsPerBlock
 
 //Arrays:
 VTYPE synapse[Nn][Ni] __attribute__((aligned(64)));
@@ -65,10 +65,13 @@ void classifier_layer(VTYPE (&synapse)[Nn][Ni], VTYPE (&neuron_i)[Ni], VTYPE (&n
 //    *(dneuron_n + n) = (temp > 0) ? temp : temp/4;
 //  }
 //}
-__global__ void cuda_classifier_layer(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *dneuron_n) {
+__global__ void cuda_classifier_layer_1DBlocks(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *dneuron_n) {
     __shared__ VTYPE temp[threadsPerBlock];
     int index = blockDim.x*blockIdx.x + threadIdx.x;
-      temp[threadIdx.x] = *(dsynapse+ index) * (*(dneuron_i + threadIdx.x));
+  for (int n = 0; n < Nn; n++) {
+    if(index < Ni)
+    {
+      temp[threadIdx.x] = *(dsynapse + Ni*n + index) * (*(dneuron_i + index));
 
       __syncthreads();
 
@@ -77,9 +80,12 @@ __global__ void cuda_classifier_layer(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *
         VTYPE sum = 0.0;
         for( int i = 0; i < threadsPerBlock; i++ )
           sum += temp[i];
-        *(dneuron_n + blockIdx.x) = (sum > 0) ? sum : sum/4;
+       // *(dneuron_n + n) = (sum > 0) ? sum : sum/4;
+          atomicAdd((dneuron_n + n),sum);
       }
-
+  __syncthreads();
+  }
+  }
 }
 
 void classifier_layer_blocked(VTYPE (&synapse)[Nn][Ni], VTYPE (&neuron_i)[Ni], 
@@ -143,7 +149,7 @@ int main(int argc, char** argv) {
   err = cudaMalloc(&dev_neuron_n, Nn*sizeof(VTYPE));
   if (err != cudaSuccess)
   {
-      fprintf(stderr, "Failed to allocate device neuron_n (error code %s)!\n", cudaGetErrorString(err));
+      fprintf(stderr, "Failed to allocate device dev_neuron_n (error code %s)!\n", cudaGetErrorString(err));
       exit(EXIT_FAILURE);
   }
 
@@ -163,17 +169,9 @@ int main(int argc, char** argv) {
       exit(EXIT_FAILURE);
   }
 
-  err = cudaMemcpy(dev_neuron_n, neuron_n, Nn*sizeof(VTYPE), cudaMemcpyHostToDevice);
-
-  if (err != cudaSuccess)
-  {
-      fprintf(stderr, "Failed to copy neuron_n from host to device (error code %s)!\n", cudaGetErrorString(err));
-      exit(EXIT_FAILURE);
-  }
-
-  cout << "start cuda simple version complete!\n";  
+  cout << "begin cuda 1D blocks simple version\n";  
   begin_roi();
-  cuda_classifier_layer <<< blocksPerGrid, threadsPerBlock >>> (dev_synapse,dev_neuron_i,dev_neuron_n);
+  cuda_classifier_layer_1DBlocks <<< blocksPerGrid, threadsPerBlock >>> (dev_synapse,dev_neuron_i,dev_neuron_n);
   err = cudaMemcpy(neuron_n2_from_dev, dev_neuron_n, Nn*sizeof(VTYPE), cudaMemcpyDeviceToHost);
 
   if (err != cudaSuccess)
@@ -181,9 +179,12 @@ int main(int argc, char** argv) {
       fprintf(stderr, "Failed to copy neuron_n2_from_dev from device to host (error code %s)!\n", cudaGetErrorString(err));
       exit(EXIT_FAILURE);
   }
+  for (int n=0; n<Nn; ++n)
+    *(neuron_n2_from_dev + n) = (*(neuron_n2_from_dev + n) > 0)
+      ? *(neuron_n2_from_dev + n) : (*(neuron_n2_from_dev + n)) /4.0;
   end_roi();
 
-  cout << "cuda simple version complete!\n";  
+  cout << "cuda 1D blocks simple version complete!\n";  
 
   begin_roi();
   classifier_layer_blocked(synapse,neuron_i,neuron_n2);  
