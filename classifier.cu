@@ -136,14 +136,42 @@ __global__ void cuda_classifier_layer_batch_2DBlocks(VTYPE *dsynapse, VTYPE *dne
 }
 
 __global__ void cuda_classifier_layer_batch_3DBlocks(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *dneuron_n) {
-  int i = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int j = (blockIdx.y * blockDim.y) + threadIdx.y;
-  int b = (blockIdx.z * blockDim.z) + threadIdx.z;
-  if((i < Nn) && (j < Ni) && (b < BATCH)) 
-  {  
-    VTYPE temp = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
-    atomicAdd((dneuron_n + b*Nn + i),temp);
-  }
+  #ifndef SHARED
+    int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int j = (blockIdx.y * blockDim.y) + threadIdx.y;
+    int b = (blockIdx.z * blockDim.z) + threadIdx.z;
+    if((i < Nn) && (j < Ni) && (b < BATCH)) 
+    {  
+      VTYPE temp = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
+      atomicAdd((dneuron_n + b*Nn + i),temp);
+    }
+
+  #else 
+
+    int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int j = (blockIdx.y * blockDim.y) + threadIdx.y;
+    int b = (blockIdx.z * blockDim.z) + threadIdx.z;
+    VTYPE temp[threadsPerBlockPerDim3D][threadsPerBlockPerDim3D][threadsPerBlockPerDim3D]
+    if((i < Nn) && (j < Ni) && (b < BATCH)) 
+    {  
+      VTYPE temp[threadIdx.x][threadIdx.y][threadIdx.z] = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
+
+      __syncthreads();
+
+      if(0==threadIdx.x)
+      {
+        VTYPE sum = 0.0;
+        for(i=0; i < threadsPerBlockPerDim3D; ++i)
+          for(j=0; j < threadsPerBlockPerDim3D; ++j)
+            for(k=0; k < threadsPerBlockPerDim3D; ++k)
+              sum += temp[i][j][k];
+        atomicAdd((dneuron_n + b*Nn + i),sum);
+      }
+
+      __syncthreads();
+    }
+
+  #endif
 }
 
 void batch_classifier_layer(VTYPE (&synapse)[Nn][Ni], VTYPE (&neuron_i)[BATCH][Ni], VTYPE (&neuron_n)[BATCH][Nn]) {

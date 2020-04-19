@@ -274,10 +274,16 @@ endif
 
 # Target rules
 MODULE          := conv1 conv2 class1 class2
+
 all: $(MODULE)
 HEADERS=dnn.hpp
 #CFLAGS=$(OPT) --std=c++11 -g -ggdb -gdwarf-3 -O3
 CFLAGS=$(OPT) --std=c++11 -g -O3
+share=0
+
+ifdef shared
+	share=1
+endif
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -287,26 +293,26 @@ else
 endif
 
 conv1.o:convolution.cu $(HEADERS)
-	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNx=224 -DNy=224 -DKx=3  -DKy=3  -DNi=64  -DNn=64        -DTii=32 -DTi=16  -DTnn=32 -DTn=16 -DTx=7 -DTy=7 -c $<
+	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNx=224 -DNy=224 -DKx=3  -DKy=3  -DNi=64  -DNn=64        -DTii=32 -DTi=16  -DTnn=32 -DTn=16 -DTx=7 -DTy=7 -DSHARE=$(share) -c $<
 
 conv1: conv1.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 
 conv2.o:convolution.cu $(HEADERS)
-	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -DNx=14 -DNy=14   -DKx=3  -DKy=3  -DNi=512  -DNn=512      -DTii=32 -DTi=16  -DTnn=32 -DTn=16 -DTx=2 -DTy=2 -c $<
+	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -DNx=14 -DNy=14   -DKx=3  -DKy=3  -DNi=512  -DNn=512      -DTii=32 -DTi=16  -DTnn=32 -DTn=16 -DTx=2 -DTy=2 -DSHARE=$(share) -c $<
 
 conv2: conv2.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 class1.o:classifier.cu $(HEADERS)
-	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNi=25088 -DNn=4096   -DTii=512 -DTi=64     -DTnn=32  -DTn=16 -c $<
+	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNi=25088 -DNn=4096   -DTii=512 -DTi=64     -DTnn=32  -DTn=16 -DSHARE=$(share) -c $<
 
 class1: class1.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 class2.o:classifier.cu $(HEADERS)
-	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNi=4096 -DNn=1024    -DTii=32 -DTi=32      -DTnn=32  -DTn=16 -c $<
+	$(EXEC) $(NVCC) $(CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@  -DNi=4096 -DNn=1024    -DTii=32 -DTi=32      -DTnn=32  -DTn=16 -DSHARE=$(share) -c $<
 
 class2: class2.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
