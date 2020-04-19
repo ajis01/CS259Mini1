@@ -23,8 +23,10 @@ using namespace std;
   #define Ti 16
 #endif
 #define  threadsPerBlock  256
+#define  threadsPerBlockPerDim2D  16
+#define  threadsPerBlockPerDim3D  8
 #define  blocksPerGrid    (Ni + threadsPerBlock - 1) / threadsPerBlock
-#define BATCH 4
+#define BATCH 8
 
 //Arrays:
 VTYPE synapse[Nn][Ni] __attribute__((aligned(64)));
@@ -32,6 +34,7 @@ VTYPE neuron_i[Ni] __attribute__((aligned(64)));
 VTYPE batch_neuron_i[BATCH][Ni] __attribute__((aligned(64)));
 VTYPE neuron_n[Nn] __attribute__((aligned(64)));
 VTYPE batch_neuron_n[BATCH][Nn] __attribute__((aligned(64)));
+VTYPE batch_neuron_n3D[BATCH][Nn] __attribute__((aligned(64)));
 VTYPE batch_neuron_n_gold[BATCH][Nn] __attribute__((aligned(64)));
 VTYPE neuron_n2[Nn] __attribute__((aligned(64)));//   neuron_n2_from_dev[Nn] __attribute__((aligned(64)));
 
@@ -132,6 +135,17 @@ __global__ void cuda_classifier_layer_batch_2DBlocks(VTYPE *dsynapse, VTYPE *dne
   }
 }
 
+__global__ void cuda_classifier_layer_batch_3DBlocks(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *dneuron_n) {
+  int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int j = (blockIdx.y * blockDim.y) + threadIdx.y;
+  int b = (blockIdx.z * blockDim.z) + threadIdx.z;
+  if((i < Nn) && (j < Ni) && (b < BATCH)) 
+  {  
+    VTYPE temp = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
+    atomicAdd((dneuron_n + b*Nn + i),temp);
+  }
+}
+
 void batch_classifier_layer(VTYPE (&synapse)[Nn][Ni], VTYPE (&neuron_i)[BATCH][Ni], VTYPE (&neuron_n)[BATCH][Nn]) {
   VTYPE val=0;
   int i,j,k;
@@ -217,6 +231,7 @@ int main(int argc, char** argv) {
 
   VTYPE * dev_batch_neuron_i;  
   VTYPE * dev_batch_neuron_n; 
+  VTYPE * dev_batch_neuron_n3D; 
 
   cudaError_t err = cudaSuccess;
   err = cudaMalloc(&dev_synapse,  Ni*Nn*sizeof(VTYPE));
@@ -279,12 +294,12 @@ int main(int argc, char** argv) {
       exit(EXIT_FAILURE);
   }
 
-  dim3 threadsPerBlock1(16, 16);
-  dim3 numBlocks((Nn + threadsPerBlock1.x - 1)/threadsPerBlock1.x,  /* for instance 512/8 = 64*/
-              (Ni + threadsPerBlock1.y -1)/threadsPerBlock1.y);
+  dim3 threadsPerBlock2(threadsPerBlockPerDim2D, threadsPerBlockPerDim2D);
+  dim3 numBlocks((Nn + threadsPerBlock2.x - 1)/threadsPerBlock2.x,  /* for instance 512/8 = 64*/
+              (Ni + threadsPerBlock2.y -1)/threadsPerBlock2.y);
   cout << "begin cuda 2D blocks simple version\n";  
   begin_roi();
-  cuda_classifier_layer_2DBlocks <<< numBlocks, threadsPerBlock1 >>>   (dev_synapse,dev_neuron_i,dev_neuron_n2D);   
+  cuda_classifier_layer_2DBlocks <<< numBlocks, threadsPerBlock2 >>>   (dev_synapse,dev_neuron_i,dev_neuron_n2D);   
   err = cudaMemcpy(neuron_n2D_from_dev, dev_neuron_n2D, Nn*sizeof(VTYPE), cudaMemcpyDeviceToHost);
 
   if (err != cudaSuccess)
@@ -324,17 +339,17 @@ int main(int argc, char** argv) {
   begin_roi();
   batch_classifier_layer(synapse,batch_neuron_i,batch_neuron_n_gold);
   end_roi();
-  cout << "cuda 2D blocks batch goldeb version complete!\n";  
+  cout << "cuda 2D blocks batch golden version complete!\n";  
 
   cout << "begin cuda 2D blocks batch version\n";  
   begin_roi();
-  cuda_classifier_layer_batch_2DBlocks <<< numBlocks, threadsPerBlock1 >>>
+  cuda_classifier_layer_batch_2DBlocks <<< numBlocks, threadsPerBlock2 >>>
     (dev_synapse,dev_batch_neuron_i,dev_batch_neuron_n);   
   err = cudaMemcpy(batch_neuron_n, dev_batch_neuron_n, BATCH*Nn*sizeof(VTYPE), cudaMemcpyDeviceToHost);
 
   if (err != cudaSuccess)
   {
-      fprintf(stderr, "Failed to copy batch_neuron_n_from_dev from device to host (error code %s)!\n", cudaGetErrorString(err));
+      fprintf(stderr, "Failed to copy dev_batch_neuron_n from device to host (error code %s)!\n", cudaGetErrorString(err));
       exit(EXIT_FAILURE);
   }
   for (int b=0; b<BATCH; ++b)
@@ -343,6 +358,34 @@ int main(int argc, char** argv) {
         : batch_neuron_n[b][n]/4.0;
   end_roi();
   cout << "cuda 2D blocks batch version complete!\n";  
+
+  err = cudaMalloc(&dev_batch_neuron_n3D, BATCH*Nn*sizeof(VTYPE));
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to allocate device dev_batch_neuron_n3D (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  cout << "begin cuda 3D blocks batch version\n";  
+  dim3 threadsPerBlock3(threadsPerBlockPerDim3D, threadsPerBlockPerDim3D, threadsPerBlockPerDim3D);
+  dim3 numBlocksPerGrid3D((Nn + threadsPerBlock3.x - 1)/threadsPerBlock3.x,  
+              (Ni + threadsPerBlock3.y -1)/threadsPerBlock3.y, (BATCH + threadsPerBlock3.z -1)/threadsPerBlock3.z);
+  begin_roi();
+  cuda_classifier_layer_batch_3DBlocks <<< numBlocksPerGrid3D, threadsPerBlock3 >>>
+    (dev_synapse,dev_batch_neuron_i,dev_batch_neuron_n3D);   
+  err = cudaMemcpy(batch_neuron_n3D, dev_batch_neuron_n3D, BATCH*Nn*sizeof(VTYPE), cudaMemcpyDeviceToHost);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to copy dev_batch_neuron_n3D from device to host (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+  for (int b=0; b<BATCH; ++b)
+    for (int n=0; n<Nn; ++n)
+      batch_neuron_n3D[b][n] = (batch_neuron_n3D[b][n] > 0) ? batch_neuron_n3D[b][n]
+        : batch_neuron_n3D[b][n]/4.0;
+  end_roi();
+  cout << "cuda 3D blocks batch version complete!\n";  
 
   begin_roi();
   classifier_layer_blocked(synapse,neuron_i,neuron_n2);  
@@ -358,6 +401,10 @@ int main(int argc, char** argv) {
   else
     cout << "Batch results do not match!\n"; 
 
+  if(!(batch_compare(batch_neuron_n_gold,batch_neuron_n3D)))
+    cout << "Batch results match for 3D!\n"; 
+  else
+    cout << "Batch results do not match for 3D!\n"; 
   cout << "done\n";
   
 }
