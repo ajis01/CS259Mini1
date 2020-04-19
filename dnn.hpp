@@ -32,6 +32,13 @@ VTYPE transfer(VTYPE i) {
   return (i>0) ? i : i/4;
 }
 
+void transfer_array(VTYPE* neuron, int size) {
+  for(int i = 0; i < size; ++i) {
+    VTYPE temp = neuron[i];
+    neuron[i] = (temp > 0) ? temp : temp/4;
+  }
+}
+
 void compare(VTYPE* neuron1, VTYPE* neuron2, int size) {
   bool error = false;
   for(int i = 0; i < size; ++i) {
