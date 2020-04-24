@@ -22,11 +22,16 @@ using namespace std;
   #define Tn 16
   #define Ti 16
 #endif
-#define  threadsPerBlock  256
-#define  threadsPerBlockPerDim2D  16
-#define  threadsPerBlockPerDim3D  8
+//#define  threadsPerBlock  512
+//#define  threadsPerBlockPerDim2D  32
+//#define  threadsPerBlockPerDim3DBATCH  1
+//#define  threadsPerBlockPerDim3D  16
 #define  blocksPerGrid    (Ni + threadsPerBlock - 1) / threadsPerBlock
-#define BATCH 8
+//#define BATCH 1
+
+#define transferThreadsPerBlock Nn
+#define  transferBlocksPerGrid    (Nn + transferThreadsPerBlock - 1) / transferThreadsPerBlock 
+#define  batchTransferBlocksPerGrid    (BATCH*Nn + transferThreadsPerBlock - 1) / transferThreadsPerBlock 
 
 //Arrays:
 VTYPE synapse[Nn][Ni] __attribute__((aligned(64)));
@@ -136,7 +141,8 @@ __global__ void cuda_classifier_layer_batch_2DBlocks(VTYPE *dsynapse, VTYPE *dne
 }
 
 __global__ void cuda_classifier_layer_batch_3DBlocks(VTYPE *dsynapse, VTYPE *dneuron_i, VTYPE *dneuron_n) {
-  #ifndef SHARED
+  if(!SHARE)
+  {
     int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     int j = (blockIdx.y * blockDim.y) + threadIdx.y;
     int b = (blockIdx.z * blockDim.z) + threadIdx.z;
@@ -145,33 +151,41 @@ __global__ void cuda_classifier_layer_batch_3DBlocks(VTYPE *dsynapse, VTYPE *dne
       VTYPE temp = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
       atomicAdd((dneuron_n + b*Nn + i),temp);
     }
+  }
 
-  #else 
-
+  else
+  { 
     int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     int j = (blockIdx.y * blockDim.y) + threadIdx.y;
     int b = (blockIdx.z * blockDim.z) + threadIdx.z;
-    VTYPE temp[threadsPerBlockPerDim3D][threadsPerBlockPerDim3D][threadsPerBlockPerDim3D]
+    __shared__ VTYPE  temp[threadsPerBlockPerDim3DBATCH][threadsPerBlockPerDim3D][threadsPerBlockPerDim3D];
     if((i < Nn) && (j < Ni) && (b < BATCH)) 
     {  
-      VTYPE temp[threadIdx.x][threadIdx.y][threadIdx.z] = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
+      temp[threadIdx.x][threadIdx.y][threadIdx.z] = *(dsynapse + i*Ni + j) * (*(dneuron_i + b*Ni + j));
 
       __syncthreads();
 
       if(0==threadIdx.x)
       {
         VTYPE sum = 0.0;
-        for(i=0; i < threadsPerBlockPerDim3D; ++i)
-          for(j=0; j < threadsPerBlockPerDim3D; ++j)
-            for(k=0; k < threadsPerBlockPerDim3D; ++k)
-              sum += temp[i][j][k];
+        for(int ii=0; ii < threadsPerBlockPerDim3DBATCH; ++ii)
+          for(int jj=0; jj < threadsPerBlockPerDim3D; ++jj)
+            for(int kk=0; kk < threadsPerBlockPerDim3D; ++kk)
+              sum += temp[ii][jj][kk];
         atomicAdd((dneuron_n + b*Nn + i),sum);
       }
 
       __syncthreads();
     }
+  }
+}
 
-  #endif
+__global__ void cuda_transfer_array(VTYPE *dneuron_n)
+{
+  int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+  VTYPE temp = dneuron_n[i];
+  temp = (temp > 0) ? temp : temp/4.0;
+  dneuron_n[i] = temp;
 }
 
 void batch_classifier_layer(VTYPE (&synapse)[Nn][Ni], VTYPE (&neuron_i)[BATCH][Ni], VTYPE (&neuron_n)[BATCH][Nn]) {
@@ -302,6 +316,7 @@ int main(int argc, char** argv) {
   cout << "begin cuda 1D blocks simple version\n";  
   begin_roi();
   cuda_classifier_layer_1DBlocks <<< blocksPerGrid, threadsPerBlock >>> (dev_synapse,dev_neuron_i,dev_neuron_n);
+  cuda_transfer_array <<< transferThreadsPerBlock, transferBlocksPerGrid >>> (dev_neuron_n);
   err = cudaMemcpy(neuron_n2_from_dev, dev_neuron_n, Nn*sizeof(VTYPE), cudaMemcpyDeviceToHost);
 
   if (err != cudaSuccess)
@@ -309,9 +324,9 @@ int main(int argc, char** argv) {
       fprintf(stderr, "Failed to copy neuron_n2_from_dev from device to host (error code %s)!\n", cudaGetErrorString(err));
       exit(EXIT_FAILURE);
   }
-  for (int n=0; n<Nn; ++n)
-    *(neuron_n2_from_dev + n) = (*(neuron_n2_from_dev + n) > 0)
-      ? *(neuron_n2_from_dev + n) : (*(neuron_n2_from_dev + n)) /4.0;
+  //for (int n=0; n<Nn; ++n)
+  //  *(neuron_n2_from_dev + n) = (*(neuron_n2_from_dev + n) > 0)
+  //    ? *(neuron_n2_from_dev + n) : (*(neuron_n2_from_dev + n)) /4.0;
   end_roi();
 
   cout << "cuda 1D blocks simple version complete!\n";  
@@ -395,7 +410,7 @@ int main(int argc, char** argv) {
   }
 
   cout << "begin cuda 3D blocks batch version\n";  
-  dim3 threadsPerBlock3(threadsPerBlockPerDim3D, threadsPerBlockPerDim3D, threadsPerBlockPerDim3D);
+  dim3 threadsPerBlock3(threadsPerBlockPerDim3DBATCH, threadsPerBlockPerDim3D, threadsPerBlockPerDim3D);
   dim3 numBlocksPerGrid3D((Nn + threadsPerBlock3.x - 1)/threadsPerBlock3.x,  
               (Ni + threadsPerBlock3.y -1)/threadsPerBlock3.y, (BATCH + threadsPerBlock3.z -1)/threadsPerBlock3.z);
   begin_roi();
@@ -433,6 +448,7 @@ int main(int argc, char** argv) {
     cout << "Batch results match for 3D!\n"; 
   else
     cout << "Batch results do not match for 3D!\n"; 
+    //cout << "\033[1;32mbold red text\033[0m\n";
   cout << "done\n";
   
 }

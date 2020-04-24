@@ -1,0 +1,27 @@
+initializing arrays
+starting computation
+elapsed (sec): 0.179521
+simple version complete!
+begin cuda 1D blocks simple version
+elapsed (sec): 0.009589
+cuda 1D blocks simple version complete!
+begin cuda 2D blocks simple version
+elapsed (sec): 0.001513
+cuda 2D blocks simple version complete!
+begin cuda 2D blocks batch golden version
+elapsed (sec): 1.52672
+cuda 2D blocks batch golden version complete!
+begin cuda 2D blocks batch version
+elapsed (sec): 0.010663
+cuda 2D blocks batch version complete!
+begin cuda 3D blocks batch version
+elapsed (sec): 0.031502
+cuda 3D blocks batch version complete!
+elapsed (sec): 0.161245
+blocked computation complete!
+results match
+results match
+results match
+Batch results match!
+Batch results match for 3D!
+done

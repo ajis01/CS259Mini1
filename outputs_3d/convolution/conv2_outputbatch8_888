@@ -1,0 +1,25 @@
+allocating memory
+initializing arrays
+starting computation
+elapsed (sec): 0.77513
+simple version complete!
+starting batch computation
+elapsed (sec): 6.1736
+Batch version complete!
+starting cuda 2D computation
+elapsed (sec): 0.008079
+cuda 2D version complete!
+starting cuda batch 2D computation
+elapsed (sec): 0.062381
+cuda batch 2D version complete!
+starting cuda batch 3D computation
+elapsed (sec): 0.036942
+cuda batch 3D version complete!
+start blocked computation!
+elapsed (sec): 0.451261
+blocked computation complete!
+results match
+results match
+results match
+results match
+done

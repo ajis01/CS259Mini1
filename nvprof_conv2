@@ -1,0 +1,101 @@
+==397342== NVPROF is profiling process 397342, command: ./conv2
+==397342== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==397342== Profiling application: ./conv2
+allocating memory
+initializing arrays
+starting computation
+elapsed (sec): 0.64232
+simple version complete!
+starting batch computation
+elapsed (sec): 5.25888
+Batch version complete!
+starting cuda 2D computation
+elapsed (sec): 0.271739
+cuda 2D version complete!
+starting cuda batch 2D computation
+elapsed (sec): 0.659095
+cuda batch 2D version complete!
+starting cuda batch 3D computation
+elapsed (sec): 0.639155
+cuda batch 3D version complete!
+start blocked computation!
+elapsed (sec): 0.330341
+blocked computation complete!
+results match
+results match
+results match
+results match
+done
+==397342== Profiling result:
+==397342== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "TITAN V (0)"
+    Kernel: cuda_convolution_layer2D(float[512][512][3][3]&, float[512][17][17]&, float[512][14][14]&)
+          1                      dram_read_throughput             Device Memory Read Throughput  36.119GB/s  36.119GB/s  36.119GB/s
+          1                    dram_read_transactions           Device Memory Read Transactions     5098147     5098147     5098147
+          1                     dram_write_throughput            Device Memory Write Throughput  1.6364GB/s  1.6364GB/s  1.6364GB/s
+          1                   dram_write_transactions          Device Memory Write Transactions      230974      230974      230974
+          1                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                   sysmem_write_throughput            System Memory Write Throughput  37.144KB/s  37.144KB/s  37.143KB/s
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
+          1                  l2_tex_read_transactions           L2 Transactions (Texture Reads)    27383220    27383220    27383220
+          1                    shared_load_throughput             Shared Memory Load Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  shared_load_transactions                  Shared Load Transactions           0           0           0
+          1                   shared_store_throughput            Shared Memory Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                 shared_store_transactions                 Shared Store Transactions           0           0           0
+          1                            gld_efficiency             Global Memory Load Efficiency      25.02%      25.02%      25.02%
+          1                            gld_throughput                    Global Load Throughput  1739.0GB/s  1739.0GB/s  1739.0GB/s
+          1                          gld_transactions                  Global Load Transactions   245458795   245458795   245458795
+          1                            gst_efficiency            Global Memory Store Efficiency       0.00%       0.00%       0.00%
+          1                            gst_throughput                   Global Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                          gst_transactions                 Global Store Transactions           0           0           0
+          1                          dram_utilization                 Device Memory Utilization     Low (1)     Low (1)     Low (1)
+          1                            l2_utilization                      L2 Cache Utilization     Low (3)     Low (3)     Low (3)
+          1                    l2_tex_read_throughput             L2 Throughput (Texture Reads)  194.00GB/s  194.00GB/s  194.00GB/s
+    Kernel: cuda_batch_convolution_layer3D(float[512][512][3][3]&, float[512][17][17][8]&, float[512][14][14][8]&)
+          1                      dram_read_throughput             Device Memory Read Throughput  1.8216GB/s  1.8216GB/s  1.8216GB/s
+          1                    dram_read_transactions           Device Memory Read Transactions     1553702     1553702     1553702
+          1                     dram_write_throughput            Device Memory Write Throughput  4.1800GB/s  4.1800GB/s  4.1800GB/s
+          1                   dram_write_transactions          Device Memory Write Transactions     3565280     3565280     3565280
+          1                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                   sysmem_write_throughput            System Memory Write Throughput  6.1465KB/s  6.1465KB/s  6.1455KB/s
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
+          1                  l2_tex_read_transactions           L2 Transactions (Texture Reads)    15846144    15846144    15846144
+          1                    shared_load_throughput             Shared Memory Load Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  shared_load_transactions                  Shared Load Transactions           0           0           0
+          1                   shared_store_throughput            Shared Memory Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                 shared_store_transactions                 Shared Store Transactions           0           0           0
+          1                            gld_efficiency             Global Memory Load Efficiency      50.00%      50.00%      50.00%
+          1                            gld_throughput                    Global Load Throughput  1219.8GB/s  1219.8GB/s  1219.8GB/s
+          1                          gld_transactions                  Global Load Transactions  1040449456  1040449456  1040449456
+          1                            gst_efficiency            Global Memory Store Efficiency       0.00%       0.00%       0.00%
+          1                            gst_throughput                   Global Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                          gst_transactions                 Global Store Transactions           0           0           0
+          1                          dram_utilization                 Device Memory Utilization     Low (1)     Low (1)     Low (1)
+          1                            l2_utilization                      L2 Cache Utilization     Low (3)     Low (3)     Low (3)
+          1                    l2_tex_read_throughput             L2 Throughput (Texture Reads)  18.578GB/s  18.578GB/s  18.578GB/s
+    Kernel: cuda_batch_convolution_layer2D(float[512][512][3][3]&, float[512][17][17][8]&, float[512][14][14][8]&)
+          1                      dram_read_throughput             Device Memory Read Throughput  28.432GB/s  28.432GB/s  28.432GB/s
+          1                    dram_read_transactions           Device Memory Read Transactions    28252779    28252779    28252779
+          1                     dram_write_throughput            Device Memory Write Throughput  1.2307GB/s  1.2307GB/s  1.2307GB/s
+          1                   dram_write_transactions          Device Memory Write Transactions     1222917     1222917     1222917
+          1                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                   sysmem_write_throughput            System Memory Write Throughput  5.2754KB/s  5.2754KB/s  5.2744KB/s
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
+          1                  l2_tex_read_transactions           L2 Transactions (Texture Reads)    63662054    63662054    63662054
+          1                    shared_load_throughput             Shared Memory Load Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                  shared_load_transactions                  Shared Load Transactions           0           0           0
+          1                   shared_store_throughput            Shared Memory Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                 shared_store_transactions                 Shared Store Transactions           0           0           0
+          1                            gld_efficiency             Global Memory Load Efficiency      25.01%      25.01%      25.01%
+          1                            gld_throughput                    Global Load Throughput  1976.7GB/s  1976.7GB/s  1976.7GB/s
+          1                          gld_transactions                  Global Load Transactions  1964215147  1964215147  1964215147
+          1                            gst_efficiency            Global Memory Store Efficiency       0.00%       0.00%       0.00%
+          1                            gst_throughput                   Global Store Throughput  0.00000B/s  0.00000B/s  0.00000B/s
+          1                          gst_transactions                 Global Store Transactions           0           0           0
+          1                          dram_utilization                 Device Memory Utilization     Low (1)     Low (1)     Low (1)
+          1                            l2_utilization                      L2 Cache Utilization     Low (3)     Low (3)     Low (3)
+          1                    l2_tex_read_throughput             L2 Throughput (Texture Reads)  64.067GB/s  64.067GB/s  64.067GB/s

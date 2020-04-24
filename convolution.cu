@@ -31,11 +31,11 @@ using namespace std;
 
 #define SYNAPSE_SIZE (1L*Ky*Kx*Nn*Ni)
 
-#define  threadsPerBlock  256
-#define  threadsPerBlockPerDim2D  16
-#define  threadsPerBlockPerDim3D  8
+//#define  threadsPerBlock  256
+//#define  threadsPerBlockPerDim2D  16
+//#define  threadsPerBlockPerDim3D  8
 #define  blocksPerGrid    (Ni + threadsPerBlock - 1) / threadsPerBlock
-#define BATCH 4
+//#define BATCH 4
 
 VTYPE (*synapse)[Ky][Kx][Nn][Ni];
 VTYPE  (*neuron_i)[NYPAD][NXPAD][Ni];
@@ -556,7 +556,7 @@ int main(const int argc, const char** argv) {
 
   cout << "starting cuda batch 3D computation\n";
   begin_roi();
-  dim3 threadsPerBlock3(threadsPerBlockPerDim3D, threadsPerBlockPerDim3D, threadsPerBlockPerDim3D);
+  dim3 threadsPerBlock3(threadsPerBlockPerDim3DBATCH, threadsPerBlockPerDim3D, threadsPerBlockPerDim3D);
   dim3 grid3D((Nn + threadsPerBlock3.x - 1)/threadsPerBlock3.x,  
               (Ni + threadsPerBlock3.y -1)/threadsPerBlock3.y, (BATCH + threadsPerBlock3.z -1)/threadsPerBlock3.z);
   cuda_batch_convolution_layer3D<<<grid3D,threadsPerBlock3>>>(*dev_synapse,*dev_batch_neuron_i,*dev_batch_neuron_n3D);
