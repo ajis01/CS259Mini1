@@ -1,0 +1,49 @@
+==226352== NVPROF is profiling process 226352, command: ./conv1
+==226352== Profiling application: ./conv1
+allocating memory
+initializing arrays
+starting computation
+elapsed (sec): 2.07015
+simple version complete!
+starting batch computation
+elapsed (sec): 18.5226
+Batch version complete!
+starting cuda 2D computation
+elapsed (sec): 0.225084
+cuda 2D version complete!
+starting cuda batch 2D computation
+elapsed (sec): 1.65251
+cuda batch 2D version complete!
+starting cuda batch 3D computation
+elapsed (sec): 0.980277
+cuda batch 3D version complete!
+start blocked computation!
+elapsed (sec): 1.55798
+blocked computation complete!
+results match
+results match
+results match
+results match
+done
+==226352== Profiling result:
+==226352== Metric result:
+Invocations                               Metric Name                                    Metric Description         Min         Max         Avg
+Device "TITAN V (0)"
+    Kernel: cuda_batch_convolution_layer3D(float[64][64][3][3]&, float[64][227][227][8]&, float[64][224][224][8]&)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)  1.4798e+10  1.4798e+10  1.4798e+10
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)  1.4798e+10  1.4798e+10  1.4798e+10
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_convolution_layer2D(float[64][64][3][3]&, float[64][227][227]&, float[64][224][224]&)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)  1849688064  1849688064  1849688064
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)  1849688064  1849688064  1849688064
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_batch_convolution_layer2D(float[64][64][3][3]&, float[64][227][227][8]&, float[64][224][224][8]&)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)  1.4798e+10  1.4798e+10  1.4798e+10
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)  1.4798e+10  1.4798e+10  1.4798e+10
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0

@@ -1,0 +1,63 @@
+==226329== NVPROF is profiling process 226329, command: ./class2
+==226329== Profiling application: ./class2
+initializing arrays
+starting computation
+elapsed (sec): 0.007217
+simple version complete!
+begin cuda 1D blocks simple version
+elapsed (sec): 0.081093
+cuda 1D blocks simple version complete!
+begin cuda 2D blocks simple version
+elapsed (sec): 0.005122
+cuda 2D blocks simple version complete!
+begin cuda 2D blocks batch golden version
+elapsed (sec): 0.059243
+cuda 2D blocks batch golden version complete!
+begin cuda 2D blocks batch version
+elapsed (sec): 0.004524
+cuda 2D blocks batch version complete!
+begin cuda 3D blocks batch version
+elapsed (sec): 0.00513
+cuda 3D blocks batch version complete!
+elapsed (sec): 0.006809
+blocked computation complete!
+results match
+results match
+results match
+Batch results match!
+Batch results match for 3D!
+done
+==226329== Profiling result:
+==226329== Metric result:
+Invocations                               Metric Name                                    Metric Description         Min         Max         Avg
+Device "TITAN V (0)"
+    Kernel: cuda_classifier_layer_batch_2DBlocks(float*, float*, float*)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)    33554432    33554432    33554432
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)    33554432    33554432    33554432
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_transfer_array(float*)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)           0           0           0
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)           0           0           0
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_classifier_layer_2DBlocks(float*, float*, float*)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)     4194304     4194304     4194304
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)     4194304     4194304     4194304
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_classifier_layer_batch_3DBlocks(float*, float*, float*)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)    33554432    33554432    33554432
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)           0           0           0
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)    33554432    33554432    33554432
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
+    Kernel: cuda_classifier_layer_1DBlocks(float*, float*, float*)
+          1                             flop_count_sp           Floating Point Operations(Single Precision)     8388608     8388608     8388608
+          1                         flop_count_sp_add       Floating Point Operations(Single Precision Add)     4194304     4194304     4194304
+          1                         flop_count_sp_mul        Floating Point Operation(Single Precision Mul)     4194304     4194304     4194304
+          1                         flop_count_sp_fma       Floating Point Operations(Single Precision FMA)           0           0           0
+          1                     flop_count_sp_special   Floating Point Operations(Single Precision Special)           0           0           0
