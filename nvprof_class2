@@ -1,26 +1,26 @@
-==72022== NVPROF is profiling process 72022, command: ./class2
-==72022== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
-==72022== Profiling application: ./class2
+==80222== NVPROF is profiling process 80222, command: ./class2
+==80222== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==80222== Profiling application: ./class2
 initializing arrays
 starting computation
-elapsed (sec): 0.007655
+elapsed (sec): 0.007295
 simple version complete!
 begin cuda 1D blocks simple version
-elapsed (sec): 0.225374
+elapsed (sec): 0.29177
 cuda 1D blocks simple version complete!
 begin cuda 2D blocks simple version
-elapsed (sec): 0.077854
+elapsed (sec): 0.138542
 cuda 2D blocks simple version complete!
 begin cuda 2D blocks batch golden version
-elapsed (sec): 0.061194
+elapsed (sec): 0.064343
 cuda 2D blocks batch golden version complete!
 begin cuda 2D blocks batch version
-elapsed (sec): 0.083736
+elapsed (sec): 0.115578
 cuda 2D blocks batch version complete!
 begin cuda 3D blocks batch version
-elapsed (sec): 0.090889
+elapsed (sec): 0.139251
 cuda 3D blocks batch version complete!
-elapsed (sec): 0.014441
+elapsed (sec): 0.005894
 blocked computation complete!
 results match
 results match
@@ -28,22 +28,24 @@ results match
 Batch results match!
 Batch results match for 3D!
 done
-==72022== Profiling result:
-==72022== Metric result:
+==80222== Profiling result:
+==80222== Metric result:
 Invocations                               Metric Name                        Metric Description         Min         Max         Avg
 Device "TITAN V (0)"
     Kernel: cuda_classifier_layer_batch_2DBlocks(float*, float*, float*)
-          1                          gld_transactions                  Global Load Transactions    17825791    17825791    17825791
+          1                          gld_transactions                  Global Load Transactions    17825790    17825790    17825790
           1                          gst_transactions                 Global Store Transactions           0           0           0
-          1                       atomic_transactions                       Atomic Transactions     2111207     2111207     2111207
+          1                       atomic_transactions                       Atomic Transactions     2112283     2112283     2112283
           1                   local_load_transactions                   Local Load Transactions           0           0           0
           1                  local_store_transactions                  Local Store Transactions           0           0           0
           1                  shared_load_transactions                  Shared Load Transactions           0           0           0
           1                 shared_store_transactions                 Shared Store Transactions           0           0           0
-          1                      l2_read_transactions                      L2 Read Transactions     4906113     4906113     4906113
+          1                      l2_read_transactions                      L2 Read Transactions     4930360     4930360     4930360
           1                     l2_write_transactions                     L2 Write Transactions     4194320     4194320     4194320
-          1                    dram_read_transactions           Device Memory Read Transactions      516907      516907      516907
-          1                   dram_write_transactions          Device Memory Write Transactions       73684       73684       73684
+          1                    dram_read_transactions           Device Memory Read Transactions      516515      516515      516515
+          1                   dram_write_transactions          Device Memory Write Transactions       73468       73468       73468
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
     Kernel: cuda_transfer_array(float*)
           1                          gld_transactions                  Global Load Transactions        1024        1024        1024
           1                          gst_transactions                 Global Store Transactions        1024        1024        1024
@@ -52,34 +54,40 @@ Device "TITAN V (0)"
           1                  local_store_transactions                  Local Store Transactions           0           0           0
           1                  shared_load_transactions                  Shared Load Transactions           0           0           0
           1                 shared_store_transactions                 Shared Store Transactions           0           0           0
-          1                      l2_read_transactions                      L2 Read Transactions        1364        1364        1364
+          1                      l2_read_transactions                      L2 Read Transactions        1120        1120        1120
           1                     l2_write_transactions                     L2 Write Transactions        1040        1040        1040
           1                    dram_read_transactions           Device Memory Read Transactions         135         135         135
-          1                   dram_write_transactions          Device Memory Write Transactions         276         276         276
+          1                   dram_write_transactions          Device Memory Write Transactions         284         284         284
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
     Kernel: cuda_classifier_layer_2DBlocks(float*, float*, float*)
           1                          gld_transactions                  Global Load Transactions     2228224     2228224     2228224
           1                          gst_transactions                 Global Store Transactions           0           0           0
-          1                       atomic_transactions                       Atomic Transactions      266021      266021      266021
+          1                       atomic_transactions                       Atomic Transactions      266102      266102      266102
           1                   local_load_transactions                   Local Load Transactions           0           0           0
           1                  local_store_transactions                  Local Store Transactions           0           0           0
           1                  shared_load_transactions                  Shared Load Transactions           0           0           0
           1                 shared_store_transactions                 Shared Store Transactions           0           0           0
-          1                      l2_read_transactions                      L2 Read Transactions     1072338     1072338     1072338
-          1                     l2_write_transactions                     L2 Write Transactions      524304      524304      524304
-          1                    dram_read_transactions           Device Memory Read Transactions      511803      511803      511803
-          1                   dram_write_transactions          Device Memory Write Transactions       73544       73544       73544
+          1                      l2_read_transactions                      L2 Read Transactions     1073567     1073567     1073567
+          1                     l2_write_transactions                     L2 Write Transactions      524317      524317      524317
+          1                    dram_read_transactions           Device Memory Read Transactions      524969      524969      524969
+          1                   dram_write_transactions          Device Memory Write Transactions       63793       63793       63793
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
     Kernel: cuda_classifier_layer_batch_3DBlocks(float*, float*, float*)
           1                          gld_transactions                  Global Load Transactions     9437184     9437184     9437184
           1                          gst_transactions                 Global Store Transactions           0           0           0
-          1                       atomic_transactions                       Atomic Transactions     4207283     4207283     4207283
+          1                       atomic_transactions                       Atomic Transactions     4206709     4206709     4206709
           1                   local_load_transactions                   Local Load Transactions           0           0           0
           1                  local_store_transactions                  Local Store Transactions           0           0           0
           1                  shared_load_transactions                  Shared Load Transactions           0           0           0
           1                 shared_store_transactions                 Shared Store Transactions           0           0           0
-          1                      l2_read_transactions                      L2 Read Transactions     5025840     5025840     5025840
-          1                     l2_write_transactions                     L2 Write Transactions     4194320     4194320     4194320
-          1                    dram_read_transactions           Device Memory Read Transactions      517343      517343      517343
-          1                   dram_write_transactions          Device Memory Write Transactions       73256       73256       73256
+          1                      l2_read_transactions                      L2 Read Transactions     5029719     5029719     5029719
+          1                     l2_write_transactions                     L2 Write Transactions     4249454     4249454     4249454
+          1                    dram_read_transactions           Device Memory Read Transactions      529473      529473      529473
+          1                   dram_write_transactions          Device Memory Write Transactions       64449       64449       64449
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                 sysmem_write_transactions          System Memory Write Transactions           9           9           9
     Kernel: cuda_classifier_layer_1DBlocks(float*, float*, float*)
           1                          gld_transactions                  Global Load Transactions     1048576     1048576     1048576
           1                          gst_transactions                 Global Store Transactions           0           0           0
@@ -87,8 +95,10 @@ Device "TITAN V (0)"
           1                   local_load_transactions                   Local Load Transactions           0           0           0
           1                  local_store_transactions                  Local Store Transactions           0           0           0
           1                  shared_load_transactions                  Shared Load Transactions     1048576     1048576     1048576
-          1                 shared_store_transactions                 Shared Store Transactions      138844      138844      138844
+          1                 shared_store_transactions                 Shared Store Transactions      138749      138749      138749
           1                      l2_read_transactions                      L2 Read Transactions      557664      557664      557664
           1                     l2_write_transactions                     L2 Write Transactions       32784       32784       32784
           1                    dram_read_transactions           Device Memory Read Transactions      524935      524935      524935
-          1                   dram_write_transactions          Device Memory Write Transactions       74132       74132       74132
+          1                   dram_write_transactions          Device Memory Write Transactions       73672       73672       73672
+          1                  sysmem_read_transactions           System Memory Read Transactions           0           0           0
+          1                 sysmem_write_transactions          System Memory Write Transactions           5           5           5
